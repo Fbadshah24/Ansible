@@ -53,9 +53,11 @@
       command: a2dissite 000-default.conf
       notify: Reload Apache
 
-    - name: Install certbot for SSL
-      package:
-        name: certbot
+    - name: Install certbot and Apache plugin
+      apt:
+        name:
+          - certbot
+          - python-3-certbot-apache
         state: present
 
     - name: Obtain Let's Encrypt SSL certificate
