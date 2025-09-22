@@ -6,7 +6,7 @@
   vars:
     web_root: /var/www/html
     server_name: "{{ inventory_hostname }}"
-    ssl_email: "admin@example.com"   # email for Let's Encrypt
+    ssl_email: "rajaji@gmail.com"   # email for Let's Encrypt
 
   tasks:
     - name: Ensure package manager cache is updated (Debian/Ubuntu)
