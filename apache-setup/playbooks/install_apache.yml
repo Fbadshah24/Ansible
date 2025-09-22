@@ -1,0 +1,73 @@
+---
+- name: Install and configure Apache web server
+  hosts: webservers
+  become: yes
+
+  vars:
+    web_root: /var/www/html
+    server_name: "{{ inventory_hostname }}"
+    ssl_email: "admin@example.com"   # email for Let's Encrypt
+
+  tasks:
+    - name: Ensure package manager cache is updated (Debian/Ubuntu)
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Install Apache
+      package:
+        name: apache2
+        state: present
+
+    - name: Create web root directory
+      file:
+        path: "{{ web_root }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+
+    - name: Deploy custom index.html
+      copy:
+        dest: "{{ web_root }}/index.html"
+        content: |
+          <html>
+          <head><title>Welcome from {{ inventory_hostname }}</title></head>
+          <body><h1>Hello from {{ inventory_hostname }} (Apache)</h1></body>
+          </html>
+        owner: www-data
+        group: www-data
+        mode: '0644'
+
+    - name: Deploy Apache virtual host config
+      template:
+        src: apache.conf.j2
+        dest: /etc/apache2/sites-available/{{ inventory_hostname }}.conf
+      notify: Reload Apache
+
+    - name: Enable site config
+      command: a2ensite {{ inventory_hostname }}.conf
+      notify: Reload Apache
+
+    - name: Ensure default site is disabled
+      command: a2dissite 000-default.conf
+      notify: Reload Apache
+
+    - name: Install certbot for SSL
+      package:
+        name: certbot
+        state: present
+
+    - name: Obtain Let's Encrypt SSL certificate
+      command: >
+        certbot --apache -d {{ server_name }} -m {{ ssl_email }}
+        --agree-tos --non-interactive
+      notify: Reload Apache
+      when: server_name != "localhost"
+
+  handlers:
+    - name: Reload Apache
+      service:
+        name: apache2
+        state: reloaded
+
