@@ -41,7 +41,7 @@
 
     - name: Deploy Apache virtual host config
       template:
-        src: apache.conf.j2
+        src: ../templates/apache.conf.j2
         dest: /etc/apache2/sites-available/{{ inventory_hostname }}.conf
       notify: Reload Apache
 
