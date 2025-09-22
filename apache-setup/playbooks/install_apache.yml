@@ -57,7 +57,7 @@
       apt:
         name:
           - certbot
-          - python-3-certbot-apache
+          - python3-certbot-apache
         state: present
 
     - name: Obtain Let's Encrypt SSL certificate
